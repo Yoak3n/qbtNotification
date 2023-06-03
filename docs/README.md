@@ -29,3 +29,6 @@ go run main.go -help
 2. 如果为了go-cqhttp部署在公网上的安全而设置了access_token，使用-t指定access_token的值
 3. 如果参数的内容中存在一些符号（如-host、-n)，就用英文双引号`""`包裹
 
+
+
+

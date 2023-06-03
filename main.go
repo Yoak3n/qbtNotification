@@ -6,6 +6,7 @@ import (
 	"github.com/Yoak3n/qbtNotification/utils"
 	"log"
 	"net/http"
+	"time"
 )
 
 var id string
@@ -20,9 +21,10 @@ func init() {
 	flag.StringVar(&id, "id", "", "QQ号")
 	flag.StringVar(&status, "s", "end", "状态")
 	flag.StringVar(&name, "n", "", "下载完成的内容")
-	flag.StringVar(&host, "host", "127.0.0.1:5700", "go-cqhttp的http地址")
+	flag.StringVar(&host, "host", "127.0.0.1:5700", "go-cqhttp的http地址及端口号")
 	flag.StringVar(&group, "group", "", "QQ群号")
 	flag.Parse()
+	fmt.Printf("向%s %s发送：%s\n", id, group, name)
 	if group+id == "" {
 		panic("请指定通知对象：私聊的QQ号或群聊的群号")
 	}
@@ -30,13 +32,23 @@ func init() {
 
 func main() {
 	msg := utils.FormatMsg(status == "start", &name)
+	count := 0
 	for {
 		res := send(msg)
 		for _, item := range res {
 			if item.StatusCode == 200 {
 				log.Println("成功发送消息")
 				return
+			} else {
+				count++
+				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n", count)
+				if count == 10 {
+					fmt.Println("消息发送失败已达10次，放弃发送！")
+					return
+				}
+				time.Sleep(time.Second)
 			}
+
 		}
 
 	}
