@@ -32,6 +32,7 @@ func init() {
 
 func main() {
 	msg := utils.FormatMsg(status == "start", &name)
+
 	count := 0
 	for {
 		res := send(msg)
@@ -41,7 +42,13 @@ func main() {
 				return
 			} else {
 				count++
-				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n", count)
+				if count == 1 {
+					go utils.DebugNetwork()
+				}
+				if item.StatusCode == 502 {
+					fmt.Println("服务器可能屏蔽了当前IP的网络请求，请当前的网络配置")
+				}
+				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n失败原因：%s\n", count, item.Status)
 				if count == 10 {
 					fmt.Println("消息发送失败已达10次，放弃发送！")
 					return
