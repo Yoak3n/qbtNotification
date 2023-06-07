@@ -1,5 +1,5 @@
 ## qbtNotification
-一个qBittorrent向qq通知下载开始与完成的一个简单脚本（基于OneBot的[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)这个qq机器人)   
+一个qBittorrent向qq通知下载开始与完成的简单脚本（基于OneBot协议的[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)qq机器人)   
 想法来自[视频链接](https://www.bilibili.com/video/BV1qP411m7zX/)  
 (虽然确实已经有其他通知方式——windows和邮箱，但本就图一乐~)
 
