@@ -46,7 +46,7 @@ func main() {
 					go utils.DebugNetwork()
 				}
 				if item.StatusCode == 502 {
-					fmt.Println("服务器可能屏蔽了当前IP的网络请求，请当前的网络配置")
+					fmt.Println("服务器可能屏蔽了当前IP的网络请求，请检查当前的网络配置")
 				}
 				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n失败原因：%s\n", count, item.Status)
 				if count == 10 {
