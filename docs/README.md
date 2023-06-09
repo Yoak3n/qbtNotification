@@ -24,7 +24,7 @@ go run main.go -help
 ```
 #### 根据以上参数提示flag指定相应的参数
 如下图
-![img.png](https://github.com/Yoak3n/qbtNotification/docs/usage.png)
+![img.png](https://github.com/Yoak3n/qbtNotification/blob/main/docs/usage.png)
 
     1. 最好使用程序所在的绝对路径    
     2. 如果为了go-cqhttp部署在公网上的安全而设置了access_token，使用-t指定access_token的值
