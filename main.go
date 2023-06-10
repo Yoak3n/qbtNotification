@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Yoak3n/qbtNotification/utils"
+	"github.com/Yoak3n/qbtNotification/util"
 	"log"
 	"net/http"
 	"time"
@@ -15,6 +15,7 @@ var name string
 var token string
 var host string
 var group string
+var check bool
 
 func init() {
 	flag.StringVar(&token, "t", "", "access_token")
@@ -23,17 +24,30 @@ func init() {
 	flag.StringVar(&name, "n", "", "下载完成的内容")
 	flag.StringVar(&host, "host", "127.0.0.1:5700", "go-cqhttp的http地址及端口号")
 	flag.StringVar(&group, "group", "", "QQ群号")
+	flag.BoolVar(&check, "check", false, "是否检查文件名为hash值")
 	flag.Parse()
-	fmt.Printf("向%s %s发送：%s\n", id, group, name)
 	if group+id == "" {
 		panic("请指定通知对象：私聊的QQ号或群聊的群号")
 	}
 }
 
 func main() {
-	msg := utils.FormatMsg(status == "start", &name)
-
+	var tn string // 种子真正的名字
+	if check && !util.CheckHash(name) {
+		log.Println("需要进行解析")
+		n, ok := util.ParseFileName(name)
+		if ok {
+			tn = n
+		} else {
+			tn = name
+			log.Println("仍然无法获得种子文件名")
+		}
+	} else {
+		tn = name
+	}
+	msg := util.FormatMsg(status == "start", &tn)
 	count := 0
+	fmt.Printf("向%s %s发送：%s\n", id, group, tn)
 	for {
 		res := send(msg)
 		for _, item := range res {
@@ -43,7 +57,7 @@ func main() {
 			} else {
 				count++
 				if count == 1 {
-					go utils.DebugNetwork()
+					go util.DebugNetwork()
 				}
 				if item.StatusCode == 502 {
 					fmt.Println("服务器可能屏蔽了当前IP的网络请求，请检查当前的网络配置")
@@ -55,9 +69,7 @@ func main() {
 				}
 				time.Sleep(time.Second)
 			}
-
 		}
-
 	}
 }
 

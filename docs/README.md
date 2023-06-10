@@ -9,6 +9,8 @@
 go run main.go -help
 ```
 ```
+-check
+    是否检查文件名为hash值 (default false)
 -group string
     QQ群号
 -host string
@@ -29,6 +31,7 @@ go run main.go -help
     1. 最好使用程序所在的绝对路径    
     2. 如果为了go-cqhttp部署在公网上的安全而设置了access_token，使用-t指定access_token的值
     3. 如果参数的内容中存在一些符号（如-host、-n)，就用英文双引号`""`包裹
+    4. 由于查询文件名使用了第三方接口，默认不开启（一般文件名为hash值的情况都出现在手动下载时，需求不大，也尽量少用）
 
 
 
