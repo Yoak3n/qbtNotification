@@ -9,13 +9,13 @@
 go run main.go -help
 ```
 ```
--check
+-check  bool
     是否检查文件名为hash值 (default false)
--group string
+-group int
     QQ群号
 -host string
     go-cqhttp的http地址 (default "127.0.0.1:5700")
--id string
+-id int
     QQ号
 -n string
     下载完成的内容

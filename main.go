@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/Yoak3n/qbtNotification/util"
@@ -9,24 +11,24 @@ import (
 	"time"
 )
 
-var id string
+var id int64
 var status string
 var name string
 var token string
 var host string
-var group string
+var group int64
 var check bool
 
 func init() {
 	flag.StringVar(&token, "t", "", "access_token")
-	flag.StringVar(&id, "id", "", "QQ号")
+	flag.Int64Var(&id, "id", 0, "QQ号")
 	flag.StringVar(&status, "s", "end", "状态")
 	flag.StringVar(&name, "n", "", "下载完成的内容")
 	flag.StringVar(&host, "host", "127.0.0.1:5700", "go-cqhttp的http地址及端口号")
-	flag.StringVar(&group, "group", "", "QQ群号")
+	flag.Int64Var(&group, "group", 0, "QQ群号")
 	flag.BoolVar(&check, "check", false, "是否检查文件名为hash值")
 	flag.Parse()
-	if group+id == "" {
+	if group+id == 0 {
 		panic("请指定通知对象：私聊的QQ号或群聊的群号")
 	}
 }
@@ -60,42 +62,68 @@ func main() {
 					go util.DebugNetwork()
 				}
 				if item.StatusCode == 502 {
-					fmt.Println("服务器可能屏蔽了当前IP的网络请求，请检查当前的网络配置")
+					log.Println("服务器可能屏蔽了当前IP的网络请求，请检查当前的网络配置")
 				}
 				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n失败原因：%s\n", count, item.Status)
 				if count == 10 {
-					fmt.Println("消息发送失败已达10次，放弃发送！")
+					log.Println("消息发送失败已达10次，放弃发送！")
 					return
 				}
-				time.Sleep(time.Second)
+				time.Sleep(time.Second * 5)
 			}
 		}
 	}
 }
 
 func sendPrivate(msg string) *http.Response {
-	l := fmt.Sprintf("http://%s/send_private_msg?access_token=%s&user_id=%s&message=%s", host, token, id, msg)
-	res, err := http.Get(l)
+	l := fmt.Sprintf("http://%s/send_private_msg", host)
+	type Post struct {
+		UserID  int64  `json:"user_id"`
+		Message string `json:"message"`
+	}
+	post := &Post{
+		UserID:  id,
+		Message: msg,
+	}
+	data, _ := json.Marshal(post)
+	req, _ := http.NewRequest("POST", l, bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	client := &http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return res
 }
 
 func sendGroup(msg string) *http.Response {
-	l := fmt.Sprintf("http://%s/send_group_msg?access_token=%s&group_id=%s&s&message=%s", host, token, group, msg)
-	res, err := http.Get(l)
+	l := fmt.Sprintf("http://%s/send_group_msg", host)
+	type Post struct {
+		GroupID int64  `json:"user_id"`
+		Message string `json:"message"`
+	}
+	post := &Post{
+		GroupID: group,
+		Message: msg,
+	}
+	data, _ := json.Marshal(post)
+	req, _ := http.NewRequest("POST", l, bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	client := &http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return res
 }
 
 func send(msg string) (res []*http.Response) {
-	if group != "" {
+	if group != 0 {
 		res = append(res, sendGroup(msg))
 	}
-	if id != "" {
+	if id != 0 {
 		res = append(res, sendPrivate(msg))
 	}
 	return res
