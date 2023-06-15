@@ -37,10 +37,10 @@ func ParseFileName(name string) (string, bool) {
 	// magnet查询接口
 	url := "https://api.magnet-vip.com/api2/magnetinfo"
 	// 构建json请求
-	type data struct {
+	type Data struct {
 		Url string `json:"url"`
 	}
-	d := &data{Url: uri}
+	d := &Data{Url: uri}
 	j, err := json.Marshal(d)
 	if err != nil {
 		return "", false
