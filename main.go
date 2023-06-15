@@ -49,7 +49,7 @@ func main() {
 	}
 	msg := util.FormatMsg(status == "start", &tn)
 	count := 0
-	fmt.Printf("向%s %s发送：%s\n", id, group, tn)
+	fmt.Printf("向%d %d发送：%s\n", id, group, tn)
 	for {
 		res := send(msg)
 		for _, item := range res {
@@ -92,7 +92,7 @@ func sendPrivate(msg string) *http.Response {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Fatalln(err)
 	}
 	return res
 }
@@ -114,7 +114,7 @@ func sendGroup(msg string) *http.Response {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Fatalln(err)
 	}
 	return res
 }
