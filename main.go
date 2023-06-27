@@ -38,7 +38,7 @@ func main() {
 	if check && !util.CheckHash(name) {
 		log.Println("需要进行解析")
 		n, ok := util.ParseFileName(name)
-		if ok {
+		if ok && n != "" {
 			tn = n
 		} else {
 			tn = name
