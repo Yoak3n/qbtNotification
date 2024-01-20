@@ -10,22 +10,28 @@ import (
 	"net/http"
 )
 
-var id int64
-var status string
-var name string
-var token string
-var host string
-var group int64
-var check bool
+var (
+	id     int64
+	status string
+	name   string
+	token  string
+	host   string
+	group  int64
+	check  bool
+	origin string
+	kind   string
+)
 
 func init() {
-	flag.StringVar(&token, "t", "", "access_token")
+	flag.StringVar(&token, "token", "", "access_token")
 	flag.Int64Var(&id, "id", 0, "QQ号")
-	flag.StringVar(&status, "s", "end", "状态")
-	flag.StringVar(&name, "n", "", "下载完成的内容")
+	flag.StringVar(&status, "status", "end", "状态")
+	flag.StringVar(&name, "name", "", "下载完成的内容")
 	flag.StringVar(&host, "host", "127.0.0.1:5700", "go-cqhttp的http地址及端口号")
 	flag.Int64Var(&group, "group", 0, "QQ群号")
 	flag.BoolVar(&check, "check", false, "是否检查文件名为hash值")
+	flag.StringVar(&origin, "origin", "", "通知信息来源，如nas")
+	flag.StringVar(&kind, "kind", "text", "通知信息类型，如text")
 	flag.Parse()
 	if group+id == 0 {
 		panic("请指定通知对象：私聊的QQ号或群聊的群号")
@@ -59,7 +65,7 @@ func main() {
 }
 
 func sendPrivate(msg string) (*http.Response, error) {
-	l := fmt.Sprintf("http://%s/send_private_msg", host)
+	l := fmt.Sprintf("http://%s/send_private_msg?kind=%s&origin=%s", host, kind, origin)
 	type Post struct {
 		UserID  int64  `json:"user_id"`
 		Message string `json:"message"`
@@ -81,7 +87,7 @@ func sendPrivate(msg string) (*http.Response, error) {
 }
 
 func sendGroup(msg string) (*http.Response, error) {
-	l := fmt.Sprintf("http://%s/send_group_msg", host)
+	l := fmt.Sprintf("http://%s/send_group_msg?kind=%s&origin=%s", host, kind, origin)
 	type Post struct {
 		GroupID int64  `json:"user_id"`
 		Message string `json:"message"`
