@@ -8,7 +8,6 @@ import (
 	"github.com/Yoak3n/qbtNotification/util"
 	"log"
 	"net/http"
-	"time"
 )
 
 var id int64
@@ -52,30 +51,14 @@ func main() {
 	fmt.Printf("向%d %d发送：%s\n", id, group, tn)
 	for {
 		res := send(msg)
-		for _, item := range res {
-			if item.StatusCode == 200 {
-				log.Println("成功发送消息")
-				return
-			} else {
-				count++
-				if count == 1 {
-					go util.DebugNetwork()
-				}
-				if item.StatusCode == 502 {
-					log.Println("服务器可能屏蔽了当前IP的网络请求，请检查当前的网络配置")
-				}
-				fmt.Printf("消息发送失败正在重试，已失败次数：%d\n失败原因：%s\n", count, item.Status)
-				if count == 10 {
-					log.Println("消息发送失败已达10次，放弃发送！")
-					return
-				}
-				time.Sleep(time.Second * 5)
-			}
+		if ok := util.Retry(res, count); ok {
+			return
 		}
+		continue
 	}
 }
 
-func sendPrivate(msg string) *http.Response {
+func sendPrivate(msg string) (*http.Response, error) {
 	l := fmt.Sprintf("http://%s/send_private_msg", host)
 	type Post struct {
 		UserID  int64  `json:"user_id"`
@@ -92,12 +75,12 @@ func sendPrivate(msg string) *http.Response {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	return res
+	return res, nil
 }
 
-func sendGroup(msg string) *http.Response {
+func sendGroup(msg string) (*http.Response, error) {
 	l := fmt.Sprintf("http://%s/send_group_msg", host)
 	type Post struct {
 		GroupID int64  `json:"user_id"`
@@ -114,17 +97,27 @@ func sendGroup(msg string) *http.Response {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-	return res
+	return res, nil
 }
 
 func send(msg string) (res []*http.Response) {
 	if group != 0 {
-		res = append(res, sendGroup(msg))
+		rg, err := sendGroup(msg)
+		if err != nil {
+			log.Fatalln("发送群组消息出错：", err)
+		} else {
+			res = append(res, rg)
+		}
 	}
 	if id != 0 {
-		res = append(res, sendPrivate(msg))
+		rg, err := sendPrivate(msg)
+		if err != nil {
+			log.Fatalln("发送私聊消息出错：", err)
+		} else {
+			res = append(res, rg)
+		}
 	}
 	return res
 }

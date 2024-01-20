@@ -17,7 +17,7 @@ func checkPublicIP() (ip string, err error) {
 	return
 }
 
-func DebugNetwork() {
+func debugNetwork() {
 	ip, err := checkPublicIP()
 	if err != nil {
 		fmt.Println("网络请求错误")
