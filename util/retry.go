@@ -29,6 +29,7 @@ func Retry(res []*http.Response, count int) bool {
 				return true
 			}
 			time.Sleep(time.Second * 5)
+			Retry(res, count)
 		}
 	}
 	return true
